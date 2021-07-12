@@ -1,35 +1,27 @@
-const { books, authors } = require('../static/data');
-
 const resolvers = {
   Query: {
-    books: () => books,
-    book: (parent, args) => books.find((book) => book.id == args.id),
-    authors: () => authors,
-    author: (parent, args) => authors.find((author) => author.id == args.id),
+    books: async (parent, args, { methods }) => await methods.getAllBooks(),
+    book: async (parent, args, { methods }) => await methods.getBook(args.id),
+    authors: async (parent, args, { methods }) => await methods.getAllAuthors(),
+    author: async (parent, args, { methods }) =>
+      await methods.getAuthor(args.id),
   },
 
   Book: {
-    author: (parent, args) => authors.find((author) => author.id === parent.authorId),
+    author: async (parent, args, { methods }) =>
+      methods.getAuthor(parent.authorId),
   },
 
   Author: {
-    books: (parent, args) =>
-      books.filter((book) => book.authorId === parent.id),
+    books: async (parent, args, { methods }) =>
+      methods.getAllBooks({ authorId: parent.id }),
   },
 
   Mutation: {
-    createBook: (parent, args) => {
-      const book = { ...args };
-      book.id = books.length + 1;
-      books.push(book);
-      return book;
-    },
-    createAuthor: (parent, args) => {
-		const author = { ...args };
-		author.id = authors.length + 1;
-		authors.push(author);
-		return author;
-	},
+    createBook: async (parent, args, { methods }) =>
+      await methods.createBook(args),
+    createAuthor: async (parent, args, { methods }) =>
+      await methods.createAuthor(args),
   },
 };
 
